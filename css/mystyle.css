@@ -1,0 +1,72 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #000;
+}
+body div.container {
+  margin-top: 10vh;
+  background: #fff;
+  text-align: center;
+  overflow: hidden;
+}
+body div.container .introduce {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+body div.container .introduce img {
+  position: absolute;
+  z-index: 10;
+  height: 50%;
+  width: 50%;
+  margin-top: -20%;
+}
+body div.container .introduce a {
+  text-align: center;
+  background-color: rgb(0, 0, 0);
+  position: absolute;
+  height: 15%;
+  width: 20%;
+  z-index: 10;
+  display: flex;
+  margin-top: 20%;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15%;
+  text-decoration: none;
+}
+body div.container .introduce a p {
+  color: #fff;
+  font-size: 150%;
+}
+body div.container .introduce .spaceForTyping {
+  position: absolute;
+  z-index: 5;
+  bottom: 0;
+  margin-bottom: 5%;
+}
+body div.container .introduce .spaceForTyping .textTyping {
+  position: relative;
+  text-wrap: nowrap;
+  background-color: #000;
+  overflow: hidden;
+  color: #ffff00;
+  animation: typing 4s steps(40) 1s backwards infinite alternate;
+}
+
+@keyframes typing {
+  from {
+    max-width: 0;
+  }
+  to {
+    max-width: 100%;
+  }
+}
