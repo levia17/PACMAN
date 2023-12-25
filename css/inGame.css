@@ -16,6 +16,9 @@ body .container {
   margin-top: 2%;
   float: right;
   box-shadow: 0 0 10px 10px #6b5ef8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 body .container canvas {
   position: absolute;
@@ -27,7 +30,6 @@ body .container canvas {
   width: 100%;
 }
 body .container .overlay {
-  display: block;
   position: absolute;
   top: 0;
   left: 0;
@@ -38,7 +40,13 @@ body .container .overlay {
   width: 100%;
   height: 100%;
 }
-body .container .overlay _afterclick {
+body .container .overlayText {
+  margin: auto;
+  font-size: 5rem;
+  font-family: "Pixelify_Sans";
+  color: #9cff8f;
+}
+body .container .overlay_afterclick {
   display: none;
 }
 body .toolBars {

@@ -11,6 +11,7 @@ import { drawWall } from "./functionInGame/wall.js";
 
 function clickToStart(){
     document.querySelector('.container .overlay').setAttribute('class', 'overlay_afterclick');
+    document.querySelector('.container .overlayText').setAttribute('class', 'overlay_afterclick');
 }
 
 document.querySelector('body').addEventListener('click',()=>{
