@@ -9,10 +9,13 @@ import { pacmanChar, pacmanDirec } from "./functionInGame/pacman.js";
 //Wall
 import { drawWall } from "./functionInGame/wall.js";
 
-
+function clickToStart(){
+    document.querySelector('.container .overlay').setAttribute('class', 'overlay_afterclick');
+}
 
 document.querySelector('body').addEventListener('click',()=>{
     count++;
+    console.log(count);
     if(count == 1){
         //Info InGa,e
         countScore();
@@ -23,7 +26,7 @@ document.querySelector('body').addEventListener('click',()=>{
 
         //Movement
         pacmanDirec();
-
+        clickToStart();
     }
 })
 drawWall();
