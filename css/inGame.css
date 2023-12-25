@@ -45,6 +45,7 @@ body .container .overlayText {
   font-size: 5rem;
   font-family: "Pixelify_Sans";
   color: #9cff8f;
+  animation: clickToStart 0.8s backwards infinite alternate;
 }
 body .container .overlay_afterclick {
   display: none;
@@ -85,4 +86,12 @@ body .toolBars .time {
 @font-face {
   font-family: "Pixelify_Sans";
   src: url("../fonts/Pixelify_Sans/PixelifySans-VariableFont_wght.ttf") format("truetype");
+}
+@keyframes clickToStart {
+  from {
+    transform: scale(0.8);
+  }
+  to {
+    transform: scale(1);
+  }
 }
