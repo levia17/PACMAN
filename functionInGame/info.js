@@ -31,3 +31,9 @@ export function countTime(){
     }
   }, 100);
 }
+
+export function resetInfo(){
+  score = 0;
+  level = 0;
+  time = 0;
+}
