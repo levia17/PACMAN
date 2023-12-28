@@ -19,7 +19,6 @@ document.querySelector('body').addEventListener('click',()=>{
     console.log(count);
     if(count == 1){
         //Info InGa,e
-        countScore();
         countTime();
 
         //Create Character
