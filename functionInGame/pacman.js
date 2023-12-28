@@ -23,6 +23,21 @@
     },
   };
 
+  const ghost = {
+    x: 60,  // Đặt vị trí ban đầu của kẻ thù
+    y: 60,
+    vx: 0.5,
+    vy: 0,
+    color: "#FF0000",  // Màu sắc của kẻ thù
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 5, 0, Math.PI * 2, true);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+      ctx.closePath();
+    },
+  };
+
   /********************************************************************************/
   let count = 0;
   function generateFood() {
@@ -77,6 +92,21 @@
     let foodX = containFood[0].x;
     let foodY = containFood[0].y;
 
+      // Cập nhật vị trí của kẻ thù
+  ghost.x += ghost.vx;
+  ghost.y += ghost.vy;
+
+  // Logic để kẻ thù luôn bám đuôi Pac-Man
+  const dx = pacman.x - ghost.x;
+  const dy = pacman.y - ghost.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  // Điều chỉnh vx và vy để di chuyển theo hướng của Pac-Man
+  ghost.vx = (dx / distance) * 0.3*level;
+  ghost.vy = (dy / distance) * 0.3*level;
+
+  // Vẽ kẻ thù
+  ghost.draw();
 
 
     // if (
@@ -149,3 +179,5 @@
     count = 0;
     containFood = [];
   }
+
+  

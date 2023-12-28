@@ -1,5 +1,7 @@
 let count = 0;
 
+//Enemy
+
 // Info InGame
 import { countScore, countTime } from "./functionInGame/info.js";
 
