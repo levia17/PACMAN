@@ -29,7 +29,7 @@ body .container canvas {
   height: 100%;
   width: 100%;
 }
-body .container .overlay {
+body .container .start .overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -40,15 +40,46 @@ body .container .overlay {
   width: 100%;
   height: 100%;
 }
-body .container .overlayText {
+body .container .start .overlayText {
   margin: auto;
   font-size: 5rem;
   font-family: "Pixelify_Sans";
   color: #9cff8f;
   animation: clickToStart 0.8s backwards infinite alternate;
 }
-body .container .overlay_afterclick {
+body .container .start .overlay_afterclick {
   display: none;
+}
+body .container .beforeOG {
+  display: none;
+}
+body .container .overGame .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 2%;
+  background-color: #000000;
+  opacity: 50%;
+  z-index: 20;
+}
+body .container .overGame .popup {
+  position: absolute;
+  background-color: #838282;
+  top: 30%;
+  left: 25%;
+  width: 50%;
+  height: 25%;
+  z-index: 21;
+  border: 10px solid #a07b35;
+  animation: popupEffect 2s;
+}
+body .container .overGame .popup .text {
+  text-align: center;
+  font-family: "Pixelify_Sans";
+  font-size: 7rem;
+  color: #1eff00;
 }
 body .toolBars {
   display: flex;
@@ -93,5 +124,13 @@ body .toolBars .time {
   }
   to {
     transform: scale(1);
+  }
+}
+@keyframes popupEffect {
+  0% {
+    top: 0;
+  }
+  100% {
+    top: 30%;
   }
 }

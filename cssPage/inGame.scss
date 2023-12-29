@@ -27,26 +27,61 @@ body {
           height: 100%;
           width: 100%;
         }
-        .overlay{
-          position: absolute;
-          top: 0;
-          left: 0;
-          background-color: #ffff;
-          opacity: 30%;
-          border-radius: 2%;
-          z-index: 10;
-          width: 100%;
-          height: 100%;
+        .start{
+          .overlay{
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: #ffff;
+            opacity: 30%;
+            border-radius: 2%;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+          }
+          .overlayText{
+            margin: auto;
+            font-size: 5rem;
+            font-family: 'Pixelify_Sans';
+            color: #9cff8f;
+            animation: clickToStart 0.8s backwards infinite alternate;
+          }
+          .overlay_afterclick{
+            display: none;
+          }
         }
-        .overlayText{
-          margin: auto;
-          font-size: 5rem;
-          font-family: 'Pixelify_Sans';
-          color: #9cff8f;
-          animation: clickToStart 0.8s backwards infinite alternate;
-        }
-        .overlay_afterclick{
+        .beforeOG{
           display: none;
+        }
+        .overGame{
+          .overlay{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 2%;
+            background-color: #000000;
+            opacity: 50%;
+            z-index: 20;
+          }
+          .popup{
+            position: absolute;
+            background-color: #838282; 
+            top: 30% ;
+            left: 25%;
+            width: 50%;
+            height: 25%;
+            z-index: 21;
+            border: 10px solid #a07b35;
+            animation: popupEffect 2s;
+            .text{
+              text-align: center;
+              font-family: 'Pixelify_Sans';
+              font-size: 7rem;
+              color: #1eff00;
+            }
+          }
         }
     }
     .toolBars{
@@ -95,4 +130,13 @@ body {
   to{
     transform: scale(1);
   }
+}
+
+@keyframes popupEffect{
+0%{
+  top: 0;
+}
+100%{
+  top:30%
+}
 }

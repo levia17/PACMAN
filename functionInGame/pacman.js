@@ -1,11 +1,15 @@
 import { resetInfo, level, countScore } from "./info.js";
 import { drawWall } from "./wall.js";
 
+
 export const canvas = document.querySelector(".container canvas");
 export const ctx = canvas.getContext("2d");
 
+
+
 let containFood = [];
 let direction = "right";
+let pauseGameVar = 0;
 const color = ["#00FFFF", "#FFFF00", "#FF0000", "#00FF00"];
 
 const pacman = {
@@ -14,12 +18,11 @@ const pacman = {
   vx: 0.5,
   vy: 0,
   id: 0,
-  color: "#FFFF33",
   draw() {
     ctx.beginPath();
+    ctx.fillStyle = "#FFFF33";
     ctx.fillRect(this.x, this.y, 10, 10);
-    ctx.fillStyle = this.color;
-    ctx.closePath();
+    // ctx.closePath();
   },
 };
 
@@ -28,11 +31,10 @@ const ghost = {
   y: 60,
   vx: 0.5,
   vy: 0,
-  color: "#FF0000",
   draw() {
     ctx.beginPath();
+    ctx.fillStyle = "#FF0000";
     ctx.arc(this.x, this.y, 5, 0, Math.PI * 2, true);
-    ctx.fillStyle = this.color;
     ctx.fill();
     ctx.closePath();
   },
@@ -59,18 +61,20 @@ function generateFood() {
       const food = {
         x: xo,
         y: yo,
+        color: "#FFFF33",
         draw() {
           ctx.beginPath();
+          ctx.fillStyle = this.color;
           ctx.arc(this.x, this.y, 2, 0, Math.PI * 2, true);
-          ctx.fillStyle = "#FFFF33";
           ctx.fill();
+          ctx.closePath();
         },
       };
       containFood.push(food);
       console.log(`Food was added: ${containFood.length}`);
       return count;
     }
-    console.log(containFood);
+    console.log(containFood[0]);
   }
 }
 
@@ -78,37 +82,61 @@ export function pacmanChar() {
   // PACMAN
   const headX = pacman.x;
   const headY = pacman.y;
-
+  
   // Clear all canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+  
   pacman.x += pacman.vx;
   pacman.y += pacman.vy;
 
+  
   pacman.draw();
   drawWall();
   generateFood();
   containFood[0].draw();
+  pacmanDirec();
 
+
+  
   const foodX = containFood[0].x;
   const foodY = containFood[0].y;
-
+  
   // ENEMY
   // The enemy's position
-  ghost.x += ghost.vx;
-  ghost.y += ghost.vy;
-
-  const dx = pacman.x - ghost.x;
-  const dy = pacman.y - ghost.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
-  // the enemy's vector v
-  ghost.vx = (dx / distance) * 0.3 * level;
-  ghost.vy = (dy / distance) * 0.3 * level;
-
+    ghost.x += ghost.vx;
+    ghost.y += ghost.vy;
+    
+    const dx = pacman.x - ghost.x;
+    const dy = pacman.y - ghost.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // the enemy's vector v
+    ghost.vx = (dx / distance) * 0.3 * level;
+    ghost.vy = (dy / distance) * 0.3 * level;
+    // console.log(distance);
+  
   ghost.draw();
-
+  
   window.requestAnimationFrame(pacmanChar);
+  if (
+    (headX <= ghost.x + 5 &&
+      headX + 15 >= ghost.x &&
+      headY <= ghost.y + 5 &&
+      headY + 15   >= ghost.y) ||
+    headX <= 32 ||
+    headX >= canvas.width - 44 ||
+    headY >= canvas.height - 18 ||
+    headY <= 6
+  ) {
+    pacman.vx = 0;
+    pacman.vy = 0;
+    ghost.vx = 0;
+    ghost.vy = 0;
+    gameOver();
+    cancelAnimationFrame(pacmanChar);
+    // restartGame();
+  }
+  // console.log(pauseGameVar);
   // setTimeout(() => {
   //   window.requestAnimationFrame(pacmanChar);
   // }, 10000 / 200); // Giảm tần suất cập nhật frame xuống 10 FPS
@@ -119,7 +147,7 @@ export function pacmanChar() {
     headY < foodY + 2 &&
     headY + 10 > foodY
   ) {
-    console.log(`Eating!`);
+    // console.log(`Eating!`);
     containFood.pop();
     count = 0;
     countScore();
@@ -127,18 +155,9 @@ export function pacmanChar() {
   }
 
   // Boundary
-  if (
-    headX <= 32 ||
-    headX >= canvas.width - 44 ||
-    headY >= canvas.height - 18 ||
-    headY <= 6
-  ) {
-    console.log("death");
-    restartGame();
-  }
 }
 
-export function pacmanDirec() {
+function pacmanDirec() {
   addEventListener("keydown", (a) => {
     if (a.key == "a") {
       console.log("a is pressed");
@@ -169,6 +188,11 @@ function restartGame() {
   resetInfo();
   count = 0;
   containFood = [];
+  document.querySelector('.container .overGame').setAttribute('class', '.beforeOG');
+}
+
+function gameOver(){
+  document.querySelector('.container .beforeOG').setAttribute('class', 'overGame');
 }
 
 // // Q-learning parameters

@@ -1,6 +1,7 @@
 export let score = 0;
 export let level = 1;
 export let time = 0;
+let pauseVar = 2;
 
 document.querySelector(".score .info").innerHTML = score;
 document.querySelector(".level .info").innerHTML = level;
@@ -24,9 +25,11 @@ function countLevel() {
 
 export function countTime(){
   setInterval(() => {
-    time += 0.1;
-    if (time != 0 && time.toFixed(1) % 1 == 0) {
-      document.querySelector(".time .info").innerHTML = time.toFixed(0);
+    if(pauseVar == 1){
+      time += 0.1;
+      if (time != 0 && time.toFixed(1) % 1 == 0) {
+        document.querySelector(".time .info").innerHTML = time.toFixed(0);
+      }
     }
   }, 100);
 }
@@ -39,4 +42,9 @@ export function resetInfo(){
 document.querySelector(".level .info").innerHTML = 1;
 document.querySelector(".time .info").innerHTML = 0;
 
+}
+
+
+export function pause(){
+  document.querySelector('.container canvas').setAttribute('class', 'hidden');
 }
