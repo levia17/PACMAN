@@ -48,3 +48,7 @@ document.querySelector(".time .info").innerHTML = 0;
 export function pause(){
   document.querySelector('.container canvas').setAttribute('class', 'hidden');
 }
+
+document.querySelector('.btnRestart').addEventListener('click', ()=>{
+  location.reload();
+})

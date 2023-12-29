@@ -65,12 +65,16 @@ body .container .overGame .overlay {
   z-index: 20;
 }
 body .container .overGame .popup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
   position: absolute;
   background-color: #838282;
   top: 30%;
   left: 25%;
   width: 50%;
-  height: 25%;
+  height: 30%;
   z-index: 21;
   border: 10px solid #a07b35;
   animation: popupEffect 2s;
@@ -78,8 +82,16 @@ body .container .overGame .popup {
 body .container .overGame .popup .text {
   text-align: center;
   font-family: "Pixelify_Sans";
-  font-size: 7rem;
+  font-size: 6rem;
   color: #1eff00;
+}
+body .container .overGame .popup .btnRestart {
+  text-align: center;
+  font-size: 1.5rem;
+  cursor: crosshair;
+  background-color: #1eff00;
+  width: 30%;
+  height: 20%;
 }
 body .toolBars {
   display: flex;
