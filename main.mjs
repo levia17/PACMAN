@@ -11,10 +11,10 @@ import { pacmanChar } from "./functionInGame/pacman.js";
 //Wall
 import { drawWall } from "./functionInGame/wall.js";
 
-function clickToStart(){
-    document.querySelector('.container .overlay').setAttribute('class', 'overlay_afterclick');
-    document.querySelector('.container .overlayText').setAttribute('class', 'overlay_afterclick');
-}
+// function clickToStart(){
+//     document.querySelector('.container .overlay').setAttribute('class', 'overlay_afterclick');
+//     document.querySelector('.container .overlayText').setAttribute('class', 'overlay_afterclick');
+// }
 
 document.querySelector('body').addEventListener('click',()=>{
     count = 1;
@@ -31,11 +31,4 @@ document.querySelector('body').addEventListener('click',()=>{
         clickToStart();
     }
 })
-function stopGame(){
-    if(count == 2){
-    }
-    else if(count == 3){
-
-    }
-}
 drawWall();

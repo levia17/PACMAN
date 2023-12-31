@@ -25,12 +25,10 @@ function countLevel() {
 
 export function countTime(){
   setInterval(() => {
-    if(pauseVar == 1){
       time += 0.1;
       if (time != 0 && time.toFixed(1) % 1 == 0) {
         document.querySelector(".time .info").innerHTML = time.toFixed(0);
       }
-    }
   }, 100);
 }
 

@@ -27,9 +27,9 @@ const pacman = {
 };
 
 const ghost = {
-  x: 60,
-  y: 60,
-  vx: 0.5,
+  x: Math.random()*canvas.width,
+  y: Math.random()*canvas.height,
+  vx: 0,
   vy: 0,
   draw() {
     ctx.beginPath();
@@ -89,7 +89,6 @@ export function pacmanChar() {
   pacman.x += pacman.vx;
   pacman.y += pacman.vy;
 
-  
   pacman.draw();
   drawWall();
   generateFood();
@@ -182,139 +181,158 @@ function pacmanDirec() {
   });
 }
 
-function restartGame() {
-  pacman.x = 37;
-  pacman.y = 15;
-  resetInfo();
-  count = 0;
-  containFood = [];
-  document.querySelector('.container .overGame').setAttribute('class', '.beforeOG');
-}
+// function gameOver(){
+//   document.querySelector('.container .beforeOG').setAttribute('class', 'overGame');
+// }
 
-function gameOver(){
+
+function gameOver() {
   document.querySelector('.container .beforeOG').setAttribute('class', 'overGame');
+  setTimeout(location.reload(), 3000);
 }
 
-// // Q-learning parameters
-// const learningRate = 0.1;
-// const discountFactor = 0.9;
-// const explorationRate = 0.1;
 
-// // Q-values for each state-action pair
-// const QValues = {};
+// Q-learning parameters
+const learningRate = 0.1;
+const discountFactor = 0.9;
+const explorationRate = 0.1;
 
-// // Function to choose an action based on Q-values
-// function chooseAction(state) {
-//   if (Math.random() < explorationRate || !QValues[state]) {
-//     return Math.floor(Math.random() * 4); // Explore (random action)
-//   } else {
-//     const values = QValues[state];
-//     return values.indexOf(Math.max(...values)); // Exploit (greedy action)
+// Q-values for each state-action pair
+let QValues = {};
+
+// Function to choose an action based on Q-values
+function chooseAction(state) {
+  if (Math.random() < explorationRate || !QValues[state]) {
+    return Math.floor(Math.random() * 4); // Explore (random action)
+  } else {
+    const values = QValues[state];
+    return values.indexOf(Math.max(...values)); // Exploit (greedy action)
+  }
+}
+
+// Function to update Q-values based on the Q-learning update rule
+function updateQValues(state, action, reward, nextState) {
+  QValues[state] = QValues[state] || [0, 0, 0, 0];
+  QValues[nextState] = QValues[nextState] || [0, 0, 0, 0];
+
+  const currentQ = QValues[state][action];
+  const maxNextQ = Math.max(...QValues[nextState]);
+
+  QValues[state][action] =
+    currentQ + learningRate * (reward + discountFactor * maxNextQ - currentQ);
+}
+
+// Function to take an action in the RL environment
+function takeRLAction(action) {
+  switch (action) {
+    case 0: // Move left
+      pacman.vx = -0.5;
+      pacman.vy = 0;
+      break;
+    case 1: // Move up
+      pacman.vx = 0;
+      pacman.vy = -0.5;
+      break;
+    case 2: // Move right
+      pacman.vx = 0.5;
+      pacman.vy = 0;
+      break;
+    case 3: // Move down
+      pacman.vx = 0;
+      pacman.vy = 0.5;
+      break;
+  }
+}
+
+// Function to get the current state of the RL environment
+function getRLState() {
+  if (containFood.length > 0) {
+    return `${pacman.x.toFixed(1)}_${pacman.y.toFixed(1)}_${ghost.x.toFixed(1)}_${ghost.y.toFixed(1)}_${containFood[0].x.toFixed(1)}_${containFood[0].y.toFixed(1)}`;
+  } else {
+    return `${pacman.x.toFixed(1)}_${pacman.y.toFixed(1)}_${ghost.x.toFixed(1)}_${ghost.y.toFixed(1)}_0_0`;
+  }
+}
+
+// Function to load Q-values from LocalStorage
+function loadQValues() {
+  const storedQValues = localStorage.getItem("pacmanQValues");
+  if (storedQValues) {
+    QValues = JSON.parse(storedQValues);
+  }
+}
+
+// Function to save Q-values to LocalStorage
+function saveQValues() {
+  localStorage.setItem("pacmanQValues", JSON.stringify(QValues));
+}
+// Function to load Q-values from the server
+// async function loadQValues() {
+//   try {
+//     const response = await fetch("http://localhost:3000/loadQValues");
+//     const data = await response.json();
+
+//     if (data.success) {
+//       QValues = data.values;
+//     }
+//   } catch (error) {
+//     console.error("Error loading Q-values:", error);
 //   }
 // }
 
-// // Function to update Q-values based on the Q-learning update rule
-// function updateQValues(state, action, reward, nextState) {
-//   QValues[state] = QValues[state] || [0, 0, 0, 0];
-//   QValues[nextState] = QValues[nextState] || [0, 0, 0, 0];
+// // Function to save Q-values to the server
+// async function saveQValues() {
+//   try {
+//     const response = await fetch("http://localhost:3000/saveQValues", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ values: QValues }),
+//     });
 
-//   const currentQ = QValues[state][action];
-//   const maxNextQ = Math.max(...QValues[nextState]);
+//     const data = await response.json();
 
-//   QValues[state][action] =
-//     currentQ + learningRate * (reward + discountFactor * maxNextQ - currentQ);
-// }
-
-// // Function to take an action in the RL environment
-// function takeRLAction(action) {
-//   switch (action) {
-//     case 0: // Move left
-//       pacman.vx = -0.5 * level;
-//       pacman.vy = 0;
-//       break;
-//     case 1: // Move up
-//       pacman.vx = 0;
-//       pacman.vy = -0.5 * level;
-//       break;
-//     case 2: // Move right
-//       pacman.vx = 0.5 * level;
-//       pacman.vy = 0;
-//       break;
-//     case 3: // Move down
-//       pacman.vx = 0;
-//       pacman.vy = 0.5 * level;
-//       break;
+//     if (!data.success) {
+//       console.error("Error saving Q-values:", data.error);
+//     }
+//   } catch (error) {
+//     console.error("Error saving Q-values:", error);
 //   }
 // }
 
-// // Function to get the current state of the RL environment
-// function getRLState() {
-//   if (containFood.length > 0) {
-//     return `${pacman.x.toFixed(1)}_${pacman.y.toFixed(1)}_${ghost.x.toFixed(
-//       1
-//     )}_${ghost.y.toFixed(1)}_${containFood[0].x.toFixed(
-//       1
-//     )}_${containFood[0].y.toFixed(1)}`;
-//   } else {
-//     // Handle the case when there is no food
-//     return `${pacman.x.toFixed(1)}_${pacman.y.toFixed(1)}_${ghost.x.toFixed(
-//       1
-//     )}_${ghost.y.toFixed(1)}_0_0`;
-//   }
-// }
 
-// // Function to execute the RL game loop
-// function gameLoopRL() {
-//   const currentState = getRLState();
-//   const action = chooseAction(currentState);
-//   takeRLAction(action);
+// Load Q-values when the script starts
+loadQValues();
 
-//   // Reward function (customize based on game logic)
-//   const reward = 0;
+// Function to execute the RL game loop
+function gameLoopRL() {
+  const currentState = getRLState();
+  const action = chooseAction(currentState);
+  takeRLAction(action);
 
-//   // Update Q-values
-//   const nextState = getRLState();
-//   updateQValues(currentState, action, reward, nextState);
+  // Reward function (customize based on game logic)
+  const reward = 0;
 
-//   // Continue with the rest of your game loop code
-//   pacmanChar();
+  // Update Q-values
+  const nextState = getRLState();
+  updateQValues(currentState, action, reward, nextState);
 
-//   // Render game state (for simplicity, rendering is not implemented here)
-//   console.log(`Pacman X: ${pacman.x.toFixed(1)}, Pacman Y: ${pacman.y.toFixed(1)}, Pacman VX: ${pacman.vx.toFixed(1)}, Pacman VY: ${pacman.vy.toFixed(1)}`);
+  // Save Q-values to LocalStorage
+  saveQValues();
 
-//   // Giới hạn vận tốc của Pacman trong môi trường RL
-//   if (pacman.vx > 0.5 * level) {
-//     pacman.vx = 0.5 * level;
-//   } else if (pacman.vx < -0.5 * level) {
-//     pacman.vx = -0.5 * level;
-//   }
+  // Continue with the rest of your game loop code
+  pacmanChar();
 
-//   if (pacman.vy > 0.5 * level) {
-//     pacman.vy = 0.5 * level;
-//   } else if (pacman.vy < -0.5 * level) {
-//     pacman.vy = -0.5 * level;
-//   }
+  // Giới hạn vận tốc của Pacman trong môi trường RL
+  pacman.vx = Math.min(0.5, Math.max(-0.5, pacman.vx));
+  pacman.vy = Math.min(0.5, Math.max(-0.5, pacman.vy));
 
-//   // Giới hạn vận tốc của Ghost trong môi trường RL
-//   if (ghost.vx > 0.5 * level) {
-//     ghost.vx = 0.5 * level;
-//   } else if (ghost.vx < -0.5 * level) {
-//     ghost.vx = -0.5 * level;
-//   }
+  // Use setTimeout to control the frame rate
+  setTimeout(() => {
+    window.requestAnimationFrame(gameLoopRL);
+  }, 1000 / 10); // Giảm tần suất cập nhật frame xuống 10 FPS
+}
 
-//   if (ghost.vy > 0.5 * level) {
-//     ghost.vy = 0.5 * level;
-//   } else if (ghost.vy < -0.5 * level) {
-//     ghost.vy = -0.5 * level;
-//   }
-
-//   // Use setTimeout to control the frame rate
-//   setTimeout(() => {
-//     window.requestAnimationFrame(gameLoopRL);
-//   }, 1000 / 10); // Giảm tần suất cập nhật frame xuống 10 FPS
-// }
-
-// // Start the RL game loop
-// gameLoopRL();
-
+// Start the RL game loop
+gameLoopRL(); 
 
