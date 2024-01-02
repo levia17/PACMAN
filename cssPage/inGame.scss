@@ -20,12 +20,14 @@ body {
         justify-content: center;
         align-items: center;
         canvas{
+          background: url(../img/background.png);
           position: absolute;
           object-fit: cover;
           top: 0;
           left: 0;
           height: 100%;
           width: 100%;
+          z-index: 6;
         }
         .start{
           .overlay{
@@ -33,18 +35,20 @@ body {
             top: 0;
             left: 0;
             background-color: #ffff;
-            opacity: 30%;
             border-radius: 2%;
             z-index: 10;
             width: 100%;
             height: 100%;
           }
           .overlayText{
-            margin: auto;
-            font-size: 5rem;
+            position: absolute;
+            top: 40%;
+            left: 30%;
+            font-size: 500%;
             font-family: 'Pixelify_Sans';
-            color: #9cff8f;
+            color: #2afc00;
             animation: clickToStart 0.8s backwards infinite alternate;
+            z-index: 20;
           }
           .overlay_afterclick{
             display: none;

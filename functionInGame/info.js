@@ -1,7 +1,6 @@
 export let score = 0;
 export let level = 1;
 export let time = 0;
-let pauseVar = 2;
 
 document.querySelector(".score .info").innerHTML = score;
 document.querySelector(".level .info").innerHTML = level;
