@@ -18,7 +18,7 @@ function clickToStart(){
     document.querySelector('.container .overlayText').setAttribute('class', 'overlay_afterclick');
 }
 
-document.querySelector('body').addEventListener('click',()=>{
+// document.querySelector('body').addEventListener('click',()=>{
     count = 1;
     console.log(count);
     if(count == 1){
@@ -32,5 +32,5 @@ document.querySelector('body').addEventListener('click',()=>{
         // pacmanDirec();
         clickToStart();
     }
-})
+// })
 drawWall();

@@ -207,132 +207,203 @@ function gameOver() {
   setTimeout(location.reload(), 3000);
 }
 
-const model = tf.sequential();
-model.add(tf.layers.dense({ inputShape: [6], units: 32, activation: 'relu' }));
-model.add(tf.layers.dense({ units: 4, activation: 'linear' }));
-model.compile({ optimizer: 'adam', loss: 'meanSquaredError' });
+const learningRate = 0.001;
+const optimizer = tf.train.adam(learningRate);
 
-// Q-learning parameters
-const learningRate = 0.5;
-const discountFactor = 0.9;
-const explorationRate = 0.2;
+function getCurrentState() {
+  const foodX = containFood.length > 0 ? containFood[0].x : null;
+  const foodY = containFood.length > 0 ? containFood[0].y : null;
 
-// Q-values for each state-action pair
-let QValues = {};
+  return [
+    pacman.x,
+    pacman.y,
+    ghost.x,
+    ghost.y,
+    foodX,
+    foodY,
+    canvas.width, // Kích thước của canvas (độ rộng)
+    canvas.height, // Kích thước của canvas (độ cao)
+    direction, // Hướng hiện tại của Pacman
+    // Các yếu tố khác mà bạn muốn thêm vào
+  ];
+}
 
-// Function to choose an action based on Q-values
-async function chooseAction(state) {
-  if (Math.random() < explorationRate || !QValues[state]) {
-    return Math.floor(Math.random() * 4); // Explore (random action)
+function getReward() {
+  const headX = pacman.x;
+  const headY = pacman.y;
+
+  // Kiểm tra va chạm với tường hoặc ghost
+  if (
+    headX <= 32 ||
+    headX >= canvas.width - 44 ||
+    headY >= canvas.height - 18 ||
+    headY <= 6 ||
+    (headX <= ghost.x + 5 &&
+      headX + 15 >= ghost.x &&
+      headY <= ghost.y + 5 &&
+      headY + 15 >= ghost.y)
+  ) {
+    // Va chạm với tường hoặc ghost: Phần thưởng tiêu cực
+    return -1;
+  }
+
+  // Kiểm tra nếu Pacman đã ăn thức ăn
+  const foodX = containFood.length > 0 ? containFood[0].x : null;
+  const foodY = containFood.length > 0 ? containFood[0].y : null;
+
+  if (
+    headX < foodX + 2 &&
+    headX + 10 > foodX &&
+    headY < foodY + 2 &&
+    headY + 10 > foodY
+  ) {
+    // Pacman đã ăn thức ăn: Phần thưởng tích cực
+    return 1;
+  }
+
+  // Phần thưởng mặc định cho sự di chuyển bình thường
+  return 0;
+}
+
+// Biến cho mô hình
+const numActions = 4; // Lên, xuống, trái, phải
+
+
+// Định nghĩa kích thước của vectơ đầu vào
+const inputSize = getCurrentState().length;
+
+const model = tf.sequential({
+  layers: [
+    tf.layers.dense({ inputShape: [inputSize], units: 64, activation: 'relu' }),
+    tf.layers.dense({ units: 32, activation: 'relu' }),
+    tf.layers.dense({ units: numActions, activation: 'linear' }),
+  ],
+});
+
+// Biên dịch mô hình với trình tối ưu hóa và hàm mất mát
+model.compile({
+  optimizer: optimizer,
+  loss: 'meanSquaredError',
+});
+
+const epsilon = 0.1;
+
+// Hàm lựa chọn hành động
+function chooseAction(state) {
+  if (Math.random() < epsilon) {
+    // Khám phá: chọn một hành động ngẫu nhiên
+    return Math.floor(Math.random() * numActions);
   } else {
-    const values = QValues[state];
-    const tensorInput = tf.tensor2d([state.split('_').map(Number)]);
-    const prediction = model.predict(tensorInput);
-    const action = prediction.argMax(1).dataSync()[0];
-    tf.dispose(tensorInput);
-    tf.dispose(prediction);
-    return action;
+    // Tận dụng: chọn hành động với giá trị Q lớn nhất
+    const qValues = model.predict(tf.tensor([state])).arraySync()[0];
+    return qValues.indexOf(Math.max(...qValues));
   }
 }
 
-// Function to update Q-values based on the Q-learning update rule
-async function updateQValues(state, action, reward, nextState) {
-  QValues[state] = QValues[state] || [0, 0, 0, 0];
-  QValues[nextState] = QValues[nextState] || [0, 0, 0, 0];
+function performAction(action) {
+  const pacmanSpeed = 0.5; // Điều chỉnh tốc độ của Pacman tùy thuộc vào yêu cầu
 
-  const currentQ = QValues[state][action];
-  const tensorInput = tf.tensor2d([nextState.split('_').map(Number)]);
-  const nextQ = (await model.predict(tensorInput).data())[0];
-  tf.dispose(tensorInput);
-
-  QValues[state][action] = currentQ + learningRate * (reward + discountFactor * nextQ - currentQ);
-}
-
-// Function to take an action in the RL environment
-function takeRLAction(action) {
+  // Update the position of pacman based on the chosen action
   switch (action) {
-    case 0: // Move left
-      pacman.vx = -0.5;
-      pacman.vy = 0;
-      break;
-    case 1: // Move up
+    case 0: // Lên
       pacman.vx = 0;
-      pacman.vy = -0.5;
+      pacman.vy = -pacmanSpeed * level;
+      direction = "top";
       break;
-    case 2: // Move right
-      pacman.vx = 0.5;
-      pacman.vy = 0;
-      break;
-    case 3: // Move down
+    case 1: // Xuống
       pacman.vx = 0;
-      pacman.vy = 0.5;
+      pacman.vy = pacmanSpeed * level;
+      direction = "bot";
+      break;
+    case 2: // Trái
+      pacman.vx = -pacmanSpeed * level;
+      pacman.vy = 0;
+      direction = "left";
+      break;
+    case 3: // Phải
+      pacman.vx = pacmanSpeed * level;
+      pacman.vy = 0;
+      direction = "right";
+      break;
+    default:
       break;
   }
 }
 
-// Function to get the current state of the RL environment
-function getRLState() {
-  if (containFood.length > 0) {
-    return `${pacman.x.toFixed(1)}_${pacman.y.toFixed(1)}_${ghost.x.toFixed(1)}_${ghost.y.toFixed(1)}_${containFood[0].x.toFixed(1)}_${containFood[0].y.toFixed(1)}`;
-  } else {
-    return `${pacman.x.toFixed(1)}_${pacman.y.toFixed(1)}_${ghost.x.toFixed(1)}_${ghost.y.toFixed(1)}_0_0`;
-  }
+function getNextState() {
+  // Update the position of pacman and ghost based on their velocities
+  pacman.x += pacman.vx;
+  pacman.y += pacman.vy;
+
+  ghost.x += ghost.vx;
+  ghost.y += ghost.vy;
+
+  // Return the updated state
+  return getCurrentState();
 }
 
-// Function to execute the RL game loop
-async function gameLoopRL() {
-  const currentState = getRLState();
-  const action = await chooseAction(currentState);
-  takeRLAction(action);
+const gamma = 0.9;
 
-// Calculate Reward based on game logic
-let reward = 0;
+// Hàm huấn luyện mô hình
+function trainModel(currentState, action, reward, nextState) {
+  // Tính toán giá trị Q của trạng thái hiện tại
+  const qValuesCurrent = model.predict(tf.tensor([currentState])).arraySync()[0];
 
-// // Check if Pacman ate food
-// const foodX = containFood[0].x;
-// const foodY = containFood[0].y;
-// if (
-//   pacman.x < foodX + 2 &&
-//   pacman.x + 10 > foodX &&
-//   pacman.y < foodY + 2 &&
-//   pacman.y + 10 > foodY
-// ) {
-//   // Pacman ate food, increase reward
-//   reward += 10; // You can adjust the reward value
-//   containFood.pop(); // Remove the eaten food
-//   count = 0;
-//   countScore();
-// }
+  // Tính toán giá trị Q mục tiêu cho trạng thái hiện tại
+  let targetQValues = qValuesCurrent.slice();
+  targetQValues[action] = reward + gamma * Math.max(...model.predict(tf.tensor([nextState])).arraySync()[0]);
 
-// Check if Pacman encountered ghost
-const dx = pacman.x - ghost.x;
-const dy = pacman.y - ghost.y;
-const distance = Math.sqrt(dx * dx + dy * dy);
-if (distance < 5) {
-  // Pacman encountered ghost, decrease reward
-  reward -= 5; // You can adjust the penalty value
+  // Chuẩn bị dữ liệu đào tạo
+  const x = tf.tensor([currentState]);
+  const y = tf.tensor([targetQValues]);
+
+  // Đào tạo mô hình
+  model.fit(x, y, { epochs: 1 });
+
+  // Giải phóng bộ nhớ
+  x.dispose();
+  y.dispose();
 }
 
-  // Update Q-values
-  const nextState = getRLState();
-  await updateQValues(currentState, action, reward, nextState);
+// Hàm cập nhật trạng thái hiện tại của môi trường
+function updateCurrentState() {
+  // Lấy thông tin về vị trí của Pacman, Ghost, và có thức ăn hay không
+  const pacmanPosition = { x: pacman.x, y: pacman.y };
+  const ghostPosition = { x: ghost.x, y: ghost.y };
+  const hasFood = containFood.length > 0;
 
-  // Continue with the rest of your game loop code
-  pacmanChar();
+  // Gộp tất cả các thông tin vào một mảng để tạo trạng thái hiện tại
+  const currentState = [
+    pacmanPosition.x,
+    pacmanPosition.y,
+    ghostPosition.x,
+    ghostPosition.y,
+    hasFood ? containFood[0].x : null,
+    hasFood ? containFood[0].y : null,
+  ];
 
-  // Giới hạn vận tốc của Pacman trong môi trường RL
-  pacman.vx = Math.min(0.5, Math.max(-0.5, pacman.vx));
-  pacman.vy = Math.min(0.5, Math.max(-0.5, pacman.vy));
-
-  // Use setTimeout to control the frame rate
-  setTimeout(() => {
-    window.requestAnimationFrame(gameLoopRL);
-  }, 1000 / 10); // Giảm tần suất cập nhật frame xuống 10 FPS
-  return reward;
+  return currentState;
 }
 
-// Bắt đầu game loop
-gameLoopRL();
+// Hàm cập nhật trò chơi
+function updateGame() {
+  const currentState = getCurrentState();
+  const action = chooseAction(currentState);
+  performAction(action);
+  const nextState = getNextState();
+  const reward = getReward();
+  trainModel(currentState, action, reward, nextState);
+}
+
+// Vòng lặp game
+function gameLoop() {
+  updateGame();
+  updateCurrentState();
+  window.requestAnimationFrame(gameLoop);
+}
+
+// Khởi động vòng lặp game
+window.requestAnimationFrame(gameLoop);
 
 
 // // Q-learning parameters
